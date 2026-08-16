@@ -1,0 +1,54 @@
+# AGENTS.md — [프로젝트폴더명]
+
+## 프로젝트 개요
+- 팀 주제: `[팀 주제]`
+- 한 줄 목표: `[예: 사람이 감지되면 자동으로 조명/출입문을 제어하는 스마트 시스템]`
+
+## 기술 스택 (고정 — 임의로 바꾸지 않는다)
+- 백엔드: FastAPI (Python)
+- DB: MySQL/MariaDB (로컬 개발) → Supabase(PostgreSQL) (클라우드 배포 시 마이그레이션)
+- 프론트엔드: Next.js(TypeScript)
+- 하드웨어 제어: Python venv Mock(개발 전반부) → 라즈베리파이 5 + gpiozero(개발 후반부)
+- 영상인식: YOLO/mediapipe (Windows PC + 웹캠)
+- 배포: Render(백엔드) / Vercel(프론트)
+- 버전관리: GitHub / 문서·협업: Notion
+
+## 핵심 데이터 흐름
+1. 웹캠(vision 클라이언트)이 프레임을 분석해 감지 이벤트를 백엔드로 전송한다
+2. 백엔드가 이벤트를 받아 팀이 정한 트리거 규칙에 따라 액추에이터 desired-state를 갱신한다
+3. 하드웨어(Mock 또는 라즈베리파이)가 desired-state를 폴링해 실제로 반영한다
+4. 프론트엔드 대시보드는 WebSocket으로 현재 상태를 실시간 표시한다
+
+## AI 사용 원칙
+- 모든 작업은 `.agents/rules/karpathy-principles.md`의 4원칙(생각 먼저·단순함 우선·
+  외과적 변경·목표 기반 실행)을 기본으로 따른다
+- AI가 생성한 코드는 반드시 학생이 직접 실행하고 결과를 눈으로 확인한다
+- "AI가 알아서 잘했다"는 요약만 믿고 다음 단계로 넘어가지 않는다
+- 시크릿(API 키, 비밀번호)은 절대 채팅/프롬프트에 직접 입력하지 않는다 (security-rules.md 참고)
+- 이 킷의 `.agents/rules`, `.agents/skills`는 이미 완성되어 있다 — **다시 만들어달라고
+  요청하지 않는다.** 새 기능을 요청할 때 "역할 지정 + 관련 rules/skills 참고" 문구만
+  붙이면 AI가 알아서 참고한다 (토큰 절약)
+
+## 폴더 구조
+```
+[프로젝트폴더명]/
+├── AGENTS.md
+├── .agents/            (하네스: rules/skills/workflows/hooks/agents — 이미 완성됨)
+├── backend/            (FastAPI, .env.example 포함)
+├── frontend/           (Next.js, .env.example 포함)
+├── vision/             (영상인식 클라이언트, Windows PC에서 실행, .env.example 포함)
+└── pi/                 (라즈베리파이에서 실행되는 하드웨어 데몬, 3주차부터, .env.example 포함)
+```
+각 폴더의 `.env.example`을 `.env`로 복사해 실제 값을 채운다 (`.env`는 커밋되지
+않는다 — docs/학생용-설치-및-사용-매뉴얼.md 1단계 참고).
+
+## 팀 정보 (아래 표를 채운다 — AI에게 시키지 않고 직접 채운다)
+
+| 항목 | 값 |
+|---|---|
+| 팀 주제 | `[예: 스마트 출입 관리]` |
+| 액추에이터(제어 대상) 목록 | `[예: LED, 도어락, 부저]` |
+| 센서(모니터링 대상) 목록 | `[예: 온습도, 조도]` |
+| 영상인식 감지 대상 | `[예: 사람 감지(재실 여부)]` |
+| 트리거 규칙 | `[예: 사람 감지 시 조명 ON, 5분간 미감지 시 OFF]` |
+| 팀원 역할 분담 | `[이름 → frontend / 이름 → backend·db / 이름 → hardware / 이름 → vision]` |
